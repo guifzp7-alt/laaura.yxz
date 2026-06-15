@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: laura-vip-bot
+    env: python
+    plan: free
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "gunicorn -w 1 -b 0.0.0.0:$PORT deploy:app"
+    envVars:
+      - key: START_BACKGROUND_SERVICES
+        value: "true"
+      - key: WEBHOOK_HOST
+        value: "0.0.0.0"
+      - key: WEBHOOK_PORT
+        value: "10000"
