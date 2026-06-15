@@ -4,6 +4,7 @@ import logging
 import os
 import threading
 import asyncio
+from concurrent.futures import Future
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from flask import jsonify, request
@@ -71,6 +72,13 @@ start_background_services()
 app = flask_app
 
 
+def log_update_result(future: Future) -> None:
+    try:
+        future.result()
+    except Exception:
+        logger.exception("Failed to process Telegram update")
+
+
 @app.post("/telegram/<path:token>")
 def telegram_webhook(token: str):
     if token != settings.TELEGRAM_BOT_TOKEN:
@@ -82,5 +90,5 @@ def telegram_webhook(token: str):
 
     update = Update.de_json(payload, telegram_application.bot)
     future = asyncio.run_coroutine_threadsafe(telegram_application.process_update(update), telegram_loop)
-    future.result(timeout=30)
+    future.add_done_callback(log_update_result)
     return jsonify({"ok": True})
