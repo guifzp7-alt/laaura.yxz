@@ -12,3 +12,5 @@ services:
         value: "0.0.0.0"
       - key: WEBHOOK_PORT
         value: "10000"
+      - key: PYTHON_VERSION
+        value: "3.13.14"
