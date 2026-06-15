@@ -1,0 +1,38 @@
+services:
+  bot:
+    build: .
+    command: python bot.py
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: sqlite:////app/data/database.sqlite3
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    restart: unless-stopped
+
+  webhook:
+    build: .
+    command: gunicorn -w 2 -b 0.0.0.0:${WEBHOOK_PORT:-8000} "webhook:create_app()"
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: sqlite:////app/data/database.sqlite3
+    ports:
+      - "${WEBHOOK_PORT:-8000}:${WEBHOOK_PORT:-8000}"
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    restart: unless-stopped
+
+  scheduler:
+    build: .
+    command: python scheduler.py
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: sqlite:////app/data/database.sqlite3
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    restart: unless-stopped
